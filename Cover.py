@@ -88,26 +88,6 @@ def handle_music_message():
 def handle_photo_message():
     pass
 
-def set_language(update: Update, context: CallbackContext) -> None:
-    lang = update.message.text.lower()
-    user_data = context.user_data
-    user_id = update.effective_user.id
-
-    if "english" in lang:
-        user_data['language'] = 'en'
-    elif "فارسی" in lang:
-        user_data['language'] = 'fa'
-
-    update.message.reply_text(translate_key_to(lp.LANGUAGE_CHANGED, user_data['language']))
-    update.message.reply_text(
-        translate_key_to(lp.START_OVER_MESSAGE, user_data['language']),
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-    user = User.where('user_id', '=', user_id).first()
-    user.language = user_data['language']
-    user.push()
-
 def main():
     defaults = Defaults(parse_mode=ParseMode.MARKDOWN, timeout=120)
     persistence = PicklePersistence('persistence_storage')
