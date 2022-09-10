@@ -12,15 +12,43 @@ from telegram import (
 )
 
 import localization as lp
-from utils import translate_key_to
+from utils import translate_key_to, reset_user_data_context
 
 # from members.models import User
 
 #BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
-def command_start():
-    pass
 
+def command_start(update: Update, context: CallbackContext) -> None:
+    user_id = update.effective_user.id
+    username = update.effective_user.username
+
+    reset_user_data_context(context)
+
+    # user = User.where('user_id', '=', user_id).first()
+
+    update.message.reply_text(
+        translate_key_to(lp.START_MESSAGE, context.user_data['language']),
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    show_language_keyboard(update, context)
+
+def show_language_keyboard(update: Update, _context: CallbackContext) -> None:
+    language_button_keyboard = ReplyKeyboardMarkup(
+        [
+            ['🇬🇧 English', '🇮🇷 فارسی'],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
+
+    update.message.reply_text(
+        "Please choose a language:\n\n"
+        "لطفا زبان را انتخاب کنید:",
+        reply_markup=language_button_keyboard,
+    )
+    
 def handle_music_message():
     pass
 

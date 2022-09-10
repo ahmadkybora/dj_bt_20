@@ -27,14 +27,14 @@ def translate_key_to(key: str, destination_lang: str) -> str:
     return keys[key][destination_lang]
 
 
-# def delete_file(file_path: str) -> None:
-#     """Deletes a file from the filesystem. Simply ignores the files that don't exist.
+def delete_file(file_path: str) -> None:
+    """Deletes a file from the filesystem. Simply ignores the files that don't exist.
 
-#     **Keyword arguments:**
-#      - file_path (str) -- The file path of the file to delete
-#     """
-#     if os.path.exists(file_path):
-#         os.remove(file_path)
+    **Keyword arguments:**
+     - file_path (str) -- The file path of the file to delete
+    """
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 # def generate_music_info(tag_editor_context: dict) -> str:
@@ -109,28 +109,28 @@ def translate_key_to(key: str, destination_lang: str) -> str:
 #     return owner.is_owner if owner else False
 
 
-# def reset_user_data_context(context: CallbackContext) -> None:
-#     user_data = context.user_data
-#     language = user_data['language'] if ('language' in user_data) else 'en'
+def reset_user_data_context(context: CallbackContext) -> None:
+    user_data = context.user_data
+    language = user_data['language'] if ('language' in user_data) else 'en'
 
-#     if 'music_path' in user_data:
-#         delete_file(user_data['music_path'])
-#     if 'art_path' in user_data:
-#         delete_file(user_data['art_path'])
-#     if 'new_art_path' in user_data:
-#         delete_file(user_data['new_art_path'])
+    if 'music_path' in user_data:
+        delete_file(user_data['music_path'])
+    if 'art_path' in user_data:
+        delete_file(user_data['art_path'])
+    if 'new_art_path' in user_data:
+        delete_file(user_data['new_art_path'])
 
-#     new_user_data = {
-#         'tag_editor': {},
-#         'music_path': '',
-#         'music_duration': 0,
-#         'art_path': '',
-#         'new_art_path': '',
-#         'current_active_module': '',
-#         'music_message_id': 0,
-#         'language': language,
-#     }
-#     context.user_data.update(new_user_data)
+    new_user_data = {
+        'tag_editor': {},
+        'music_path': '',
+        'music_duration': 0,
+        'art_path': '',
+        'new_art_path': '',
+        'current_active_module': '',
+        'music_message_id': 0,
+        'language': language,
+    }
+    context.user_data.update(new_user_data)
 
 
 # def save_text_into_tag(
