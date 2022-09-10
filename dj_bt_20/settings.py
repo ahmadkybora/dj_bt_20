@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'members'
 ]
 
 MIDDLEWARE = [
@@ -73,13 +74,23 @@ WSGI_APPLICATION = 'dj_bt_20.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
+DATABASES = {
+   'default': {
+      'ENGINE': 'django.db.backends.mysql',
+      'NAME': 'ahmad',
+      'USER': 'ahmad',
+      'PASSWORD': '09392141724',
+      'HOST': 'localhost',
+      'PORT': '3306',
+   }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
