@@ -16,7 +16,7 @@ from utils import translate_key_to, reset_user_data_context, generate_start_over
 create_user_directory, download_file, increment_usage_counter_for_user, delete_file, \
 generate_module_selector_keyboard
 
-# from members.models import User
+from members.models import User
 
 #BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
@@ -35,7 +35,7 @@ def command_start(update: Update, context: CallbackContext) -> None:
 
     reset_user_data_context(context)
 
-    # user = User.where('user_id', '=', user_id).first()
+    user = User.where('user_id', '=', user_id).first()
     user = 1
 
     update.message.reply_text(
@@ -45,15 +45,15 @@ def command_start(update: Update, context: CallbackContext) -> None:
 
     show_language_keyboard(update, context)
 
-    # if not user:
-    #     new_user = User()
-    #     new_user.user_id = user_id
-    #     new_user.username = username
-    #     new_user.number_of_files_sent = 0
+    if not user:
+        new_user = User()
+        new_user.user_id = user_id
+        new_user.username = username
+        new_user.number_of_files_sent = 0
 
-    #     new_user.save()
+        new_user.save()
 
-    #     logger.info("A user with id %s has been started to use the bot.", user_id)
+        logger.info("A user with id %s has been started to use the bot.", user_id)
 
 def show_language_keyboard(update: Update, _context: CallbackContext) -> None:
     language_button_keyboard = ReplyKeyboardMarkup(
@@ -87,7 +87,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
         reply_markup=ReplyKeyboardRemove()
     )
 
-    # user = User.where('user_id', '=', user_id).first()
+    user = User.where('user_id', '=', user_id).first()
     user = 1
     user.language = user_data['language']
     user.push()
@@ -188,9 +188,9 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
 
     increment_usage_counter_for_user(user_id=user_id)
 
-    # user = User.where('user_id', '=', user_id).first()
-    # user.username = update.effective_user.username
-    # user.push()
+    user = User.where('user_id', '=', user_id).first()
+    user.username = update.effective_user.username
+    user.push()
 
     delete_file(old_music_path)
     delete_file(old_art_path)
