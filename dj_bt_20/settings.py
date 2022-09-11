@@ -81,15 +81,18 @@ WSGI_APPLICATION = 'dj_bt_20.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-   'default': {
-      'ENGINE': 'django.db.backends.mysql',
-      'NAME': 'ahmad',
-      'USER': 'ahmad',
-      'PASSWORD': '09392141724',
-      'HOST': 'localhost',
-      'PORT': '3306',
-   }
+DATABASES = {  
+    'default': {  
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'your_mysql_database_name',  
+        'USER': 'root',  
+        'PASSWORD': 'your_mysql_database_password',  
+        'HOST': '127.0.0.1',  
+        'PORT': '3306',  
+        'OPTIONS': {  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        }  
+    }  
 }
 
 # Password validation

@@ -61,24 +61,24 @@ def delete_file(file_path: str) -> None:
 #     )
 
 
-# def increment_usage_counter_for_user(user_id: int) -> int:
-#     """Increment the `number_of_files_sent` column of user with the specified `user_id`.
+def increment_usage_counter_for_user(user_id: int) -> int:
+    """Increment the `number_of_files_sent` column of user with the specified `user_id`.
 
-#     **Keyword arguments:**
-#      - user_id (int) -- The user id of the user
+    **Keyword arguments:**
+     - user_id (int) -- The user id of the user
 
-#     **Returns:**
-#      The new value for `user.number_of_files_sent`
-#     """
-#     user = User.where('user_id', '=', user_id).first()
+    **Returns:**
+     The new value for `user.number_of_files_sent`
+    """
+    user = User.where('user_id', '=', user_id).first()
 
-#     if user:
-#         user.number_of_files_sent = user.number_of_files_sent + 1
-#         user.push()
+    if user:
+        user.number_of_files_sent = user.number_of_files_sent + 1
+        user.push()
 
-#         return user.number_of_files_sent
+        return user.number_of_files_sent
 
-#     raise LookupError(f'User with id {user_id} not found.')
+    raise LookupError(f'User with id {user_id} not found.')
 
 
 # def is_user_admin(user_id: int) -> bool:
@@ -155,23 +155,23 @@ def reset_user_data_context(context: CallbackContext) -> None:
 #         context.user_data['tag_editor'][current_tag] = value
 
 
-# def create_user_directory(user_id: int) -> str:
-#     """Create a directory for a user with a given id.
+def create_user_directory(user_id: int) -> str:
+    """Create a directory for a user with a given id.
 
-#     **Keyword arguments:**
-#      - user_id (int) -- The user id of the user
+    **Keyword arguments:**
+     - user_id (int) -- The user id of the user
 
-#     **Returns:**
-#      The path of the created directory
-#     """
-#     user_download_dir = f"downloads/{user_id}"
+    **Returns:**
+     The path of the created directory
+    """
+    user_download_dir = f"downloads/{user_id}"
 
-#     try:
-#         Path(user_download_dir).mkdir(parents=True, exist_ok=True)
-#     except (OSError, FileNotFoundError, BaseException) as error:
-#         raise Exception(f"Can't create directory for user_id: {user_id}") from error
+    try:
+        Path(user_download_dir).mkdir(parents=True, exist_ok=True)
+    except (OSError, FileNotFoundError, BaseException) as error:
+        raise Exception(f"Can't create directory for user_id: {user_id}") from error
 
-#     return user_download_dir
+    return user_download_dir
 
 
 # def convert_seconds_to_human_readable_form(seconds: int) -> str:
@@ -195,38 +195,38 @@ def reset_user_data_context(context: CallbackContext) -> None:
 #     return f"{minutes_formatted}:{seconds_formatted}"
 
 
-# def download_file(user_id: int, file_to_download, file_type: str, context: CallbackContext) -> str:
-#     """Download a file using convenience methods of "python-telegram-bot"
+def download_file(user_id: int, file_to_download, file_type: str, context: CallbackContext) -> str:
+    """Download a file using convenience methods of "python-telegram-bot"
 
-#     **Keyword arguments:**
-#      - user_id (int) -- The user's id
-#      - file_to_download (*) -- The file object to download
-#      - file_type (str) -- The type of the file, either 'photo' or 'audio'
-#      - context (CallbackContext) -- The context object of the user
+    **Keyword arguments:**
+     - user_id (int) -- The user's id
+     - file_to_download (*) -- The file object to download
+     - file_type (str) -- The type of the file, either 'photo' or 'audio'
+     - context (CallbackContext) -- The context object of the user
 
-#     **Returns:**
-#      The path of the downloaded file
-#     """
-#     user_download_dir = f"downloads/{user_id}"
-#     file_id = ''
-#     file_extension = ''
+    **Returns:**
+     The path of the downloaded file
+    """
+    user_download_dir = f"downloads/{user_id}"
+    file_id = ''
+    file_extension = ''
 
-#     if file_type == 'audio':
-#         file_id = context.bot.get_file(file_to_download.file_id)
-#         file_name = file_to_download.file_name
-#         file_extension = file_name.split(".")[-1]
-#     elif file_type == 'photo':
-#         file_id = context.bot.get_file(file_to_download.file_id)
-#         file_extension = 'jpg'
+    if file_type == 'audio':
+        file_id = context.bot.get_file(file_to_download.file_id)
+        file_name = file_to_download.file_name
+        file_extension = file_name.split(".")[-1]
+    elif file_type == 'photo':
+        file_id = context.bot.get_file(file_to_download.file_id)
+        file_extension = 'jpg'
 
-#     file_download_path = f"{user_download_dir}/{file_id.file_id}.{file_extension}"
+    file_download_path = f"{user_download_dir}/{file_id.file_id}.{file_extension}"
 
-#     try:
-#         file_id.download(f"{user_download_dir}/{file_id.file_id}.{file_extension}")
-#     except ValueError as error:
-#         raise Exception(f"Couldn't download the file with file_id: {file_id}") from error
+    try:
+        file_id.download(f"{user_download_dir}/{file_id.file_id}.{file_extension}")
+    except ValueError as error:
+        raise Exception(f"Couldn't download the file with file_id: {file_id}") from error
 
-#     return file_download_path
+    return file_download_path
 
 
 # def generate_back_button_keyboard(language: str) -> ReplyKeyboardMarkup:
@@ -250,53 +250,53 @@ def reset_user_data_context(context: CallbackContext) -> None:
 #     )
 
 
-# def generate_start_over_keyboard(language: str) -> ReplyKeyboardMarkup:
-#     """Create an return an instance of `start_over_keyboard`
+def generate_start_over_keyboard(language: str) -> ReplyKeyboardMarkup:
+    """Create an return an instance of `start_over_keyboard`
 
 
-#     **Keyword arguments:**
-#      - language (str) -- The desired language to generate labels
+    **Keyword arguments:**
+     - language (str) -- The desired language to generate labels
 
-#     **Returns:**
-#      ReplyKeyboardMarkup instance
-#     """
-#     return (
-#         ReplyKeyboardMarkup(
-#             [
-#                 [translate_key_to('BTN_NEW_FILE', language)],
-#             ],
-#             resize_keyboard=True,
-#             one_time_keyboard=True,
-#         )
-#     )
-
-
-# def generate_module_selector_keyboard(language: str) -> ReplyKeyboardMarkup:
-#     """Create an return an instance of `module_selector_keyboard`
+    **Returns:**
+     ReplyKeyboardMarkup instance
+    """
+    return (
+        ReplyKeyboardMarkup(
+            [
+                [translate_key_to('BTN_NEW_FILE', language)],
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        )
+    )
 
 
-#     **Keyword arguments:**
-#      - language (str) -- The desired language to generate labels
+def generate_module_selector_keyboard(language: str) -> ReplyKeyboardMarkup:
+    """Create an return an instance of `module_selector_keyboard`
 
-#     **Returns:**
-#      ReplyKeyboardMarkup instance
-#     """
-#     return (
-#         ReplyKeyboardMarkup(
-#             [
-#                 [
-#                     translate_key_to('BTN_TAG_EDITOR', language),
-#                     translate_key_to('BTN_MUSIC_TO_VOICE_CONVERTER', language)
-#                 ],
-#                 [
-#                     translate_key_to('BTN_MUSIC_CUTTER', language),
-#                     translate_key_to('BTN_BITRATE_CHANGER', language)
-#                 ]
-#             ],
-#             resize_keyboard=True,
-#             one_time_keyboard=True,
-#         )
-#     )
+
+    **Keyword arguments:**
+     - language (str) -- The desired language to generate labels
+
+    **Returns:**
+     ReplyKeyboardMarkup instance
+    """
+    return (
+        ReplyKeyboardMarkup(
+            [
+                [
+                    translate_key_to('BTN_TAG_EDITOR', language),
+                    translate_key_to('BTN_MUSIC_TO_VOICE_CONVERTER', language)
+                ],
+                [
+                    translate_key_to('BTN_MUSIC_CUTTER', language),
+                    translate_key_to('BTN_BITRATE_CHANGER', language)
+                ]
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True,
+        )
+    )
 
 
 # def generate_tag_editor_keyboard(language: str) -> ReplyKeyboardMarkup:
