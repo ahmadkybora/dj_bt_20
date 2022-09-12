@@ -2,6 +2,7 @@ import logging
 import os
 
 import music_tag
+from orator import Model
 from telegram.error import TelegramError
 from telegram.ext import Updater, CallbackContext, CommandHandler, MessageHandler, Filters, \
      Defaults, PicklePersistence
@@ -16,9 +17,15 @@ from utils import translate_key_to, reset_user_data_context, generate_start_over
 create_user_directory, download_file, increment_usage_counter_for_user, delete_file, \
 generate_module_selector_keyboard
 
-from members.models import User
+# from members.models import User
 
-#BOT_TOKEN = os.getenv("BOT_TOKEN")
+# from models.admin import Admin
+from models.user import User
+from dbconfig import db
+
+Model.set_connection_resolver(db)
+
+# BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
 
 logger = logging.getLogger()
