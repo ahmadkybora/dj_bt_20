@@ -43,7 +43,7 @@ def command_start(update: Update, context: CallbackContext) -> None:
     reset_user_data_context(context)
 
     user = User.where('user_id', '=', user_id).first()
-    user = 1
+    # user = 1
 
     update.message.reply_text(
         translate_key_to(lp.START_MESSAGE, context.user_data['language']),
@@ -95,7 +95,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
     )
 
     user = User.where('user_id', '=', user_id).first()
-    user = 1
+    # user = 1
     user.language = user_data['language']
     user.push()
 
@@ -103,8 +103,11 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
     message = update.message
     user_id = update.effective_user.id
     user_data = context.user_data
+    # این قسمت برای گرفتن موزیک
     music_duration = message.audio.duration
+    # این قسمت برای گرفتن سایز موزیک
     music_file_size = message.audio.file_size
+    # این قسمت برای گرفتن موزیک
     old_music_path = user_data['music_path']
     old_art_path = user_data['art_path']
     old_new_art_path = user_data['new_art_path']
@@ -117,6 +120,7 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
         )
         return
 
+    # در حال تایپ
     context.bot.send_chat_action(
         chat_id=message.chat_id,
         action=ChatAction.TYPING
@@ -130,6 +134,7 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
         logger.error("Couldn't create directory for user %s", user_id, exc_info=True)
         return
 
+    # بعد از ساخت دایرکتوری فایل دانلود میشود
     try:
         file_download_path = download_file(
             user_id=user_id,
@@ -145,6 +150,7 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
         logger.error("Error on downloading %s's file. File type: Audio", user_id, exc_info=True)
         return
 
+    # در این قسمت فایل لود میشود
     try:
         music = music_tag.load_file(file_download_path)
     except (OSError, NotImplementedError):
@@ -160,6 +166,7 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
         )
         return
 
+    # چسباندن تگ های مورد نیاز
     reset_user_data_context(context)
 
     user_data['music_path'] = file_download_path
@@ -193,12 +200,14 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
 
     show_module_selector(update, context)
 
+    # تعداد ارسال فایل در دیتابیس ذخیره میشود
     increment_usage_counter_for_user(user_id=user_id)
 
     user = User.where('user_id', '=', user_id).first()
     user.username = update.effective_user.username
     user.push()
 
+    # حذف فایل بعد از انجام 
     delete_file(old_music_path)
     delete_file(old_art_path)
     delete_file(old_new_art_path)
@@ -232,7 +241,9 @@ def main():
     #################
     # File Handlers #
     #################
+    # این هندلر برای گرفتن موزیک است
     add_handler(MessageHandler(Filters.audio, handle_music_message))
+    # این هندلر برای گرفتن عکس است
     add_handler(MessageHandler(Filters.photo, handle_photo_message))
 
     ############################

@@ -6,8 +6,8 @@ import music_tag
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import CallbackContext
 
-# from members.models import Admin
-# from members.models import User
+from members.models import Admin
+from members.models import User
 from localization import keys
 
 
