@@ -1,5 +1,5 @@
 import os
-from orator import DatabaseManager
+from orator import DatabaseManager, Model
 
 # from dotenv import load_dotenv
 
@@ -17,11 +17,12 @@ DATABASES = {
         'driver': 'mysql',
         'host': 'localhost',
         'port': 3306,
-        'user': '',
-        'password': '',
-        'database': '',
+        'user': 'ahmadkybora',
+        'password': '09392141724abc',
+        'database': 'dj',
         'prefix': ''
     }
 }
 
 db = DatabaseManager(DATABASES)
+Model.set_connection_resolver(db)
