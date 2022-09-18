@@ -6,8 +6,8 @@ import music_tag
 from telegram import ReplyKeyboardMarkup
 from telegram.ext import CallbackContext
 
-from members.models import Admin
-from members.models import User
+from models.admin import Admin
+from models.user import User
 from localization import keys
 
 
@@ -37,28 +37,28 @@ def delete_file(file_path: str) -> None:
         os.remove(file_path)
 
 
-# def generate_music_info(tag_editor_context: dict) -> str:
-#     """Generate the details of the music based on the values in `tag_editor_context`
-#     dictionary
+def generate_music_info(tag_editor_context: dict) -> str:
+    """Generate the details of the music based on the values in `tag_editor_context`
+    dictionary
 
-#     **Keyword arguments:**
-#      - tag_editor_context (dict) -- The context object of the user
+    **Keyword arguments:**
+     - tag_editor_context (dict) -- The context object of the user
 
-#     **Returns:**
-#      `str`
-#     """
-#     ctx = tag_editor_context
+    **Returns:**
+     `str`
+    """
+    ctx = tag_editor_context
 
-#     return (
-#         f"*🗣 Artist:* {ctx['artist'] if ctx['artist'] else '-'}\n"
-#         f"*🎵 Title:* {ctx['title'] if ctx['title'] else '-'}\n"
-#         f"*🎼 Album:* {ctx['album'] if ctx['album'] else '-'}\n"
-#         f"*🎹 Genre:* {ctx['genre'] if ctx['genre'] else '-'}\n"
-#         f"*📅 Year:* {ctx['year'] if ctx['year'] else '-'}\n"
-#         f"*💿 Disk Number:* {ctx['disknumber'] if ctx['disknumber'] else '-'}\n"
-#         f"*▶️ Track Number:* {ctx['tracknumber'] if ctx['tracknumber'] else '-'}\n"
-#         "{}\n"
-#     )
+    return (
+        f"*🗣 Artist:* {ctx['artist'] if ctx['artist'] else '-'}\n"
+        f"*🎵 Title:* {ctx['title'] if ctx['title'] else '-'}\n"
+        f"*🎼 Album:* {ctx['album'] if ctx['album'] else '-'}\n"
+        f"*🎹 Genre:* {ctx['genre'] if ctx['genre'] else '-'}\n"
+        f"*📅 Year:* {ctx['year'] if ctx['year'] else '-'}\n"
+        f"*💿 Disk Number:* {ctx['disknumber'] if ctx['disknumber'] else '-'}\n"
+        f"*▶️ Track Number:* {ctx['tracknumber'] if ctx['tracknumber'] else '-'}\n"
+        "{}\n"
+    )
 
 
 def increment_usage_counter_for_user(user_id: int) -> int:
@@ -299,40 +299,40 @@ def generate_module_selector_keyboard(language: str) -> ReplyKeyboardMarkup:
     )
 
 
-# def generate_tag_editor_keyboard(language: str) -> ReplyKeyboardMarkup:
-#     """Create an return an instance of `tag_editor_keyboard`
+def generate_tag_editor_keyboard(language: str) -> ReplyKeyboardMarkup:
+    """Create an return an instance of `tag_editor_keyboard`
 
 
-#     **Keyword arguments:**
-#      - language (str) -- The desired language to generate labels
+    **Keyword arguments:**
+     - language (str) -- The desired language to generate labels
 
-#     **Returns:**
-#      ReplyKeyboardMarkup instance
-#     """
-#     return (
-#         ReplyKeyboardMarkup(
-#             [
-#                 [
-#                     translate_key_to('BTN_ARTIST', language),
-#                     translate_key_to('BTN_TITLE', language),
-#                     translate_key_to('BTN_ALBUM', language)
-#                 ],
-#                 [
-#                     translate_key_to('BTN_GENRE', language),
-#                     translate_key_to('BTN_YEAR', language),
-#                     translate_key_to('BTN_ALBUM_ART', language)
-#                 ],
-#                 [
-#                     translate_key_to('BTN_DISK_NUMBER', language),
-#                     translate_key_to('BTN_TRACK_NUMBER', language)
-#                 ],
-#                 [
-#                     translate_key_to('BTN_BACK', language)
-#                 ]
-#             ],
-#             resize_keyboard=True,
-#         )
-#     )
+    **Returns:**
+     ReplyKeyboardMarkup instance
+    """
+    return (
+        ReplyKeyboardMarkup(
+            [
+                [
+                    translate_key_to('BTN_ARTIST', language),
+                    translate_key_to('BTN_TITLE', language),
+                    translate_key_to('BTN_ALBUM', language)
+                ],
+                [
+                    translate_key_to('BTN_GENRE', language),
+                    translate_key_to('BTN_YEAR', language),
+                    translate_key_to('BTN_ALBUM_ART', language)
+                ],
+                [
+                    translate_key_to('BTN_DISK_NUMBER', language),
+                    translate_key_to('BTN_TRACK_NUMBER', language)
+                ],
+                [
+                    translate_key_to('BTN_BACK', language)
+                ]
+            ],
+            resize_keyboard=True,
+        )
+    )
 
 
 # def save_tags_to_file(file: str, tags: dict, new_art_path: str) -> str:

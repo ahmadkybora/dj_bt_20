@@ -15,7 +15,7 @@ from telegram import (
 import localization as lp
 from utils import translate_key_to, reset_user_data_context, generate_start_over_keyboard, \
 create_user_directory, download_file, increment_usage_counter_for_user, delete_file, \
-generate_module_selector_keyboard
+generate_module_selector_keyboard, generate_tag_editor_keyboard, generate_music_info
 
 # from members.models import User
 
@@ -27,6 +27,7 @@ Model.set_connection_resolver(db)
 
 # BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
+BOT_USERNAME = ""
 
 logger = logging.getLogger()
 
@@ -212,8 +213,51 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
     delete_file(old_art_path)
     delete_file(old_new_art_path)
 
-def handle_photo_message():
-    pass
+# این قسمت بعد از ارسال عکس انجام میشود
+def handle_photo_message(update: Update, context: CallbackContext) -> None:
+    user_data = context.user_data
+    message = update.message
+    user_id = update.effective_user.id
+    music_path = user_data['music_path']
+    current_active_module = user_data['current_active_module']
+    current_tag = user_data['tag_editor']['current_tag']
+    lang = user_data['language']
+
+    tag_editor_keyboard = generate_tag_editor_keyboard(lang)
+# در صورتی که عکس مورد نظر حاوی تگ مورد نظر نباشد پیغمی مبنی بر چه تگی را میخواهی ویرایش کنی ارسال میشود
+    if music_path:
+        if current_active_module == 'tag_editor':
+            if not current_tag or current_tag != 'album_art':
+                reply_message = translate_key_to(lp.ASK_WHICH_TAG, lang)
+                message.reply_text(reply_message, reply_markup=tag_editor_keyboard)
+            else:
+                try:
+                    # در غیر این صورت عکس دانلود میشود
+                    file_download_path = download_file(
+                        user_id=user_id,
+                        file_to_download=message.photo[len(message.photo) - 1],
+                        file_type='photo',
+                        context=context
+                    )
+                    # بعد از امجام تغییرات پیغام مورد نظر ارسال میشود
+                    reply_message = f"{translate_key_to(lp.ALBUM_ART_CHANGED, lang)} " \
+                                    f"{translate_key_to(lp.CLICK_PREVIEW_MESSAGE, lang)} " \
+                                    f"{translate_key_to(lp.OR, lang).upper()} " \
+                                    f"{translate_key_to(lp.CLICK_DONE_MESSAGE, lang).lower()}"
+                                    # در این قسمت میتوان روی اسلش دان کلیکل کرد و موزیک را گرفت/done
+                    user_data['new_art_path'] = file_download_path
+                    message.reply_text(reply_message, reply_markup=tag_editor_keyboard)
+                except (ValueError, BaseException):
+                    message.reply_text(translate_key_to(lp.ERR_ON_DOWNLOAD_AUDIO_MESSAGE, lang))
+                    logger.error(
+                        "Error on downloading %s's file. File type: Photo",
+                        user_id,
+                        exc_info=True
+                    )
+                    return
+    else:
+        reply_message = translate_key_to(lp.DEFAULT_MESSAGE, lang)
+        message.reply_text(reply_message, reply_markup=ReplyKeyboardRemove())
 
 # بعد از ارسال موزیک این قسمت فراخوانی میشود
 def show_module_selector(update: Update, context: CallbackContext) -> None:
@@ -229,6 +273,48 @@ def show_module_selector(update: Update, context: CallbackContext) -> None:
         reply_markup=module_selector_keyboard
     )
 
+# زمانیکه شما میخواهید تگ های یک موزیک را ویرایش کنید به این قسمت وارد میشود
+def handle_music_tag_editor(update: Update, context: CallbackContext) -> None:
+    message = update.message
+    user_data = context.user_data
+    art_path = user_data['art_path']
+    lang = user_data['language']
+
+    user_data['current_active_module'] = 'tag_editor'
+
+    tag_editor_context = user_data['tag_editor']
+    tag_editor_context['current_tag'] = ''
+
+# این قسمت دکمه ای شیشه ای برای ویرایش را میسازد
+    tag_editor_keyboard = generate_tag_editor_keyboard(lang)
+
+# این قسمت همه اطلاعات موزیک را میفرستد
+    if art_path:
+        with open(art_path, 'rb') as art_file:
+            message.reply_photo(
+                photo=art_file,
+                caption=generate_music_info(tag_editor_context).format(f"\n🆔 {BOT_USERNAME}"),
+                reply_to_message_id=update.effective_message.message_id,
+                reply_markup=tag_editor_keyboard,
+                parse_mode='Markdown'
+            )
+    else:
+        message.reply_text(
+            generate_music_info(tag_editor_context).format(f"\n🆔 {BOT_USERNAME}"),
+            reply_to_message_id=update.effective_message.message_id,
+            reply_markup=tag_editor_keyboard
+        )
+
+# بعد از زدن دکمه عکس آلبوم این تابع اعمال میشود
+def prepare_for_album_art(update: Update, context: CallbackContext) -> None:
+    if len(context.user_data) == 0:
+        message_text = translate_key_to(lp.DEFAULT_MESSAGE, context.user_data['language'])
+    else:
+        context.user_data['tag_editor']['current_tag'] = 'album_art'
+        message_text = translate_key_to(lp.ASK_FOR_ALBUM_ART, context.user_data['language'])
+
+    update.message.reply_text(message_text)
+
 def main():
     defaults = Defaults(parse_mode=ParseMode.MARKDOWN, timeout=120)
     persistence = PicklePersistence('persistence_storage')
@@ -237,6 +323,22 @@ def main():
     add_handler = updater.dispatcher.add_handler
 
     add_handler(CommandHandler('start', command_start))
+
+    ############################
+    # ماژول های عملیات روی موزیک
+    ############################
+    add_handler(MessageHandler(
+        (Filters.regex('^(🎵 Tag Editor)$') | Filters.regex('^(🎵 تغییر تگ ها)$')),
+        handle_music_tag_editor)
+    )
+    
+    ############################
+    # زمانیکه دکمه آلبوم عکس زده میشود این قسمت فراخوانی میشود
+    ############################
+    add_handler(MessageHandler(
+        (Filters.regex('^(🖼 Album Art)$') | Filters.regex('^(🖼 عکس آلبوم)$')),
+        prepare_for_album_art)
+    )
 
     #################
     # File Handlers #
