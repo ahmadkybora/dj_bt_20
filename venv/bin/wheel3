@@ -1,4 +1,4 @@
-#!/home/ahmadkybora/App/dj/dj_bt_20/venv/bin/python
+#!/home/ahmadkybora/App/flask/dj_bt_20/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -15,7 +15,8 @@ from telegram import (
 import localization as lp
 from utils import translate_key_to, reset_user_data_context, generate_start_over_keyboard, \
 create_user_directory, download_file, increment_usage_counter_for_user, delete_file, \
-generate_module_selector_keyboard, generate_tag_editor_keyboard, generate_music_info
+generate_module_selector_keyboard, generate_tag_editor_keyboard, generate_music_info, \
+save_tags_to_file
 
 # from members.models import User
 
@@ -26,7 +27,8 @@ from dbconfig import db
 Model.set_connection_resolver(db)
 
 # BOT_TOKEN = os.getenv("BOT_TOKEN")
-BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
+# BOT_TOKEN = "353909760:AAEvjTzsEpcW3XjMcFwtMFvPh6qE1g3nszk"
+BOT_TOKEN = "378545358:AAHuQjkYspm0CYr-ZG9xF_h31CB7V-pF118"
 BOT_USERNAME = ""
 
 logger = logging.getLogger()
@@ -239,13 +241,15 @@ def handle_photo_message(update: Update, context: CallbackContext) -> None:
                         file_type='photo',
                         context=context
                     )
-                    # بعد از امجام تغییرات پیغام مورد نظر ارسال میشود
+                    # بعد از انجام تغییرات پیغام مورد نظر ارسال میشود
                     reply_message = f"{translate_key_to(lp.ALBUM_ART_CHANGED, lang)} " \
                                     f"{translate_key_to(lp.CLICK_PREVIEW_MESSAGE, lang)} " \
                                     f"{translate_key_to(lp.OR, lang).upper()} " \
                                     f"{translate_key_to(lp.CLICK_DONE_MESSAGE, lang).lower()}"
                                     # در این قسمت میتوان روی اسلش دان کلیکل کرد و موزیک را گرفت/done
+                    # آدرس عکس داخل یوزردیتا ذخیره میشود برای اینکه بعدا استفاده شود و به موزیک بچسبد
                     user_data['new_art_path'] = file_download_path
+                    # ارسال پیغام مورد نظر و همچنین ارسال دکمه های مورد نظر
                     message.reply_text(reply_message, reply_markup=tag_editor_keyboard)
                 except (ValueError, BaseException):
                     message.reply_text(translate_key_to(lp.ERR_ON_DOWNLOAD_AUDIO_MESSAGE, lang))
@@ -315,6 +319,58 @@ def prepare_for_album_art(update: Update, context: CallbackContext) -> None:
 
     update.message.reply_text(message_text)
 
+# این قسمت آخرین قسمت اجرایی است و فایل تحویل داده میشود
+def finish_editing_tags(update: Update, context: CallbackContext) -> None:
+    message = update.message
+    user_data = context.user_data
+
+    context.bot.send_chat_action(
+        chat_id=update.message.chat_id,
+        action=ChatAction.UPLOAD_AUDIO
+    )
+
+    music_path = user_data['music_path']
+    new_art_path = user_data['new_art_path']
+    music_tags = user_data['tag_editor']
+    lang = user_data['language']
+    thumb = open(new_art_path, 'rb').read()
+
+    start_over_button_keyboard = generate_start_over_keyboard(lang)
+
+    try:
+        save_tags_to_file(
+            file=music_path,
+            tags=music_tags,
+            new_art_path=new_art_path
+        )
+    except (OSError, BaseException):
+        message.reply_text(
+            translate_key_to(lp.ERR_ON_UPDATING_TAGS, lang),
+            reply_markup=start_over_button_keyboard
+        )
+        logger.error("Error on updating tags for file %s's file.", music_path, exc_info=True)
+        return
+
+    try:
+        with open(music_path, 'rb') as music_file:
+            context.bot.send_audio(
+                audio=music_file,
+                duration=user_data['music_duration'],
+                chat_id=update.message.chat_id,
+                caption=f"🆔 {BOT_USERNAME}",
+                thumb=thumb,
+                reply_markup=start_over_button_keyboard,
+                reply_to_message_id=user_data['music_message_id']
+            )
+    except (TelegramError, BaseException) as error:
+        message.reply_text(
+            translate_key_to(lp.ERR_ON_UPLOADING, lang),
+            reply_markup=start_over_button_keyboard
+        )
+        logger.exception("Telegram error: %s", error)
+
+    reset_user_data_context(context)
+
 def main():
     defaults = Defaults(parse_mode=ParseMode.MARKDOWN, timeout=120)
     persistence = PicklePersistence('persistence_storage')
@@ -331,7 +387,12 @@ def main():
         (Filters.regex('^(🎵 Tag Editor)$') | Filters.regex('^(🎵 تغییر تگ ها)$')),
         handle_music_tag_editor)
     )
-    
+
+    ############################
+    # قسمت نهایی
+    ############################
+    add_handler(CommandHandler('done', finish_editing_tags))
+
     ############################
     # زمانیکه دکمه آلبوم عکس زده میشود این قسمت فراخوانی میشود
     ############################
