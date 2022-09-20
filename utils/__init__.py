@@ -350,9 +350,6 @@ def generate_tag_editor_keyboard(language: str) -> ReplyKeyboardMarkup:
                 [
                     translate_key_to('BTN_ALBUM_ART', language)
                 ],
-                [
-                    translate_key_to('BTN_BACK', language)
-                ]
             ],
             resize_keyboard=True,
         )

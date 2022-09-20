@@ -65,6 +65,25 @@ def command_start(update: Update, context: CallbackContext) -> None:
 
         logger.info("A user with id %s has been started to use the bot.", user_id)
 
+# زمانیکه دوباره بخواهید استارت کنید فعال میشود
+def start_over(update: Update, context: CallbackContext) -> None:
+    reset_user_data_context(context)
+
+    update.message.reply_text(
+        translate_key_to(lp.START_OVER_MESSAGE, context.user_data['language']),
+        reply_to_message_id=update.effective_message.message_id,
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+# این قسمت برای نمایش یم پیغام میباشد بعنوان کمک به کاربر
+def command_help(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text(translate_key_to(lp.HELP_MESSAGE, context.user_data['language']))
+
+# یک پیغام در مورد این ربات ارسال میشود
+def command_about(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text(translate_key_to(lp.ABOUT_MESSAGE, context.user_data['language']))
+
+# نمایش انتخاب زبان صفحه کلید
 def show_language_keyboard(update: Update, _context: CallbackContext) -> None:
     language_button_keyboard = ReplyKeyboardMarkup(
         [
@@ -80,7 +99,7 @@ def show_language_keyboard(update: Update, _context: CallbackContext) -> None:
         reply_markup=language_button_keyboard,
     )
 
-
+# تنظیم زبان انتخاب شده
 def set_language(update: Update, context: CallbackContext) -> None:
     lang = update.message.text.lower()
     user_data = context.user_data
@@ -102,6 +121,7 @@ def set_language(update: Update, context: CallbackContext) -> None:
     user.language = user_data['language']
     user.push()
 
+# بعد از ارسال موزیک این قسمت انجام میشود
 def handle_music_message(update: Update, context: CallbackContext) -> None:
     message = update.message
     user_id = update.effective_user.id
@@ -116,6 +136,7 @@ def handle_music_message(update: Update, context: CallbackContext) -> None:
     old_new_art_path = user_data['new_art_path']
     language = user_data['language']
 
+# در صورتیکه موزیک بزرگتر از حجم زیر باشد یک پیغام خطا میفرستد
     if music_duration >= 3600 and music_file_size > 48000000:
         message.reply_text(
             translate_key_to(lp.ERR_TOO_LARGE_FILE, language),
@@ -371,6 +392,32 @@ def finish_editing_tags(update: Update, context: CallbackContext) -> None:
 
     reset_user_data_context(context)
 
+# پیش نمایشی از کاری که انجام شده در این قسمت انجام میشود
+def display_preview(update: Update, context: CallbackContext) -> None:
+    message = update.message
+    user_data = context.user_data
+    tag_editor_context = user_data['tag_editor']
+    art_path = user_data['art_path']
+    new_art_path = user_data['new_art_path']
+    lang = user_data['language']
+
+    if art_path or new_art_path:
+        with open(new_art_path if new_art_path else art_path, "rb") as art_file:
+            message.reply_photo(
+                photo=art_file,
+                caption=f"{generate_music_info(tag_editor_context).format('')}"
+                        f"{translate_key_to(lp.CLICK_DONE_MESSAGE, lang)}\n\n"
+                        f"🆔 {BOT_USERNAME}",
+                reply_to_message_id=update.effective_message.message_id,
+            )
+    else:
+        message.reply_text(
+            f"{generate_music_info(tag_editor_context).format('')}"
+            f"{translate_key_to(lp.CLICK_DONE_MESSAGE, lang)}\n\n"
+            f"🆔 {BOT_USERNAME}",
+            reply_to_message_id=update.effective_message.message_id,
+        )
+
 def main():
     defaults = Defaults(parse_mode=ParseMode.MARKDOWN, timeout=120)
     persistence = PicklePersistence('persistence_storage')
@@ -378,11 +425,25 @@ def main():
     updater = Updater(BOT_TOKEN, persistence=persistence, defaults=defaults)
     add_handler = updater.dispatcher.add_handler
 
+    ############################
+    #کامندهایی که کاربر میزند 
+    #############################
     add_handler(CommandHandler('start', command_start))
+    add_handler(CommandHandler('new', start_over))
+    add_handler(CommandHandler('language', show_language_keyboard))
+    add_handler(CommandHandler('help', command_help))
+    add_handler(CommandHandler('about', command_about))
+
+    add_handler(CommandHandler('done', finish_editing_tags))
+    add_handler(CommandHandler('preview', display_preview))
 
     ############################
     # ماژول های عملیات روی موزیک
     ############################
+    add_handler(MessageHandler(
+        (Filters.regex('^(🆕 New File)$') | Filters.regex('^(🆕 فایل جدید)$')),
+        start_over)
+    )
     add_handler(MessageHandler(
         (Filters.regex('^(🎵 Tag Editor)$') | Filters.regex('^(🎵 تغییر تگ ها)$')),
         handle_music_tag_editor)
@@ -392,6 +453,7 @@ def main():
     # قسمت نهایی
     ############################
     add_handler(CommandHandler('done', finish_editing_tags))
+    add_handler(CommandHandler('preview', display_preview))
 
     ############################
     # زمانیکه دکمه آلبوم عکس زده میشود این قسمت فراخوانی میشود
